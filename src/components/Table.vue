@@ -15,6 +15,8 @@
 
 <script>
 import api from '../services/api';
+import axios from 'axios';
+import { stringToDate } from '../services/conversor'
 
   export default {
     data () {
@@ -23,29 +25,35 @@ import api from '../services/api';
         selected: [],
         headers: [
           {
-            text: 'Dessert (100g serving)',
+            text: 'Tarefa',
             align: 'start',
             sortable: false,
             value: 'name',
           },
-          { text: 'Calories', value: 'calories' },
-          { text: 'Fat (g)', value: 'fat' },
-          { text: 'Carbs (g)', value: 'carbs' },
-          { text: 'Protein (g)', value: 'protein' },
-          { text: 'Iron (%)', value: 'iron' },
+          { text: 'Cron', value: 'trigger' },
+          { text: 'Ultima Execução', value: 'last_run_time' },
+          { text: 'Próxima Execução', value: 'next_run_time' },
         ],
         desserts: [],
       }
     },
     mounted() {
-      api.get('/api')
+      api.get('/scheduler/jobs')
         .then((res) => {
-          console.log(res.data)
+          // Conversão da data enviada pela API
+          for(const data of res.data) {
+            data.last_run_time = stringToDate(data.last_run_time)
+            data.next_run_time = stringToDate(data.next_run_time)
+          }
           this.desserts = res.data
         })
     },
   }
 </script>
 <style>
+
+.data-table {
+  widows: 10rem;
+}
 
 </style>
