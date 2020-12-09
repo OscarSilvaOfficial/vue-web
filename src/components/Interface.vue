@@ -38,16 +38,12 @@
               <!--  -->
             </v-sheet>
           </v-col>
-
           <v-col
             cols="12"
             sm="8"
           >
-
-            <Table />
-
+          <Table />
           </v-col>
-
           <v-col
             cols="12"
             sm="2"
@@ -61,22 +57,25 @@
           </v-col>
         </v-row>
       </v-container>
+      <Modal />
     </v-main>
   </v-app>
 </template>
 
 <script>
 import Table from './Table';
+import Modal from './Modal'
 
 export default {
     components: {
-      Table
+      Table,
+      Modal
     },
     data: () => ({
       links: [
-        'Dashboard',
-        'Messages',
-        'Logs',
+        'Grupo 01',
+        'Grupo 02',
+        'Grupo 03',
       ],
     }),
   }
