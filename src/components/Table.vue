@@ -15,7 +15,7 @@
       </v-card-title>
       <v-data-table
         :headers="cabecalhos"
-        :items="dados"
+        :items="data"
         :single-select="singleSelect"
         item-key="name"
         show-select
@@ -37,15 +37,17 @@
 </template>
 
 <script>
-import api from '../services/api';
-import axios from 'axios';
-import { stringToDate } from '../services/conversor'
+//import replaceData from '../utils/replaceData'
+
 
 export default {
+  props: {
+      data: '', /* Recebe todos os dados, e recebe uma lista de objetos */
+  },
   data() {
     return {
-      singleSelect: false,
-      search: '',
+      singleSelect: true, /* Seleção de multi campos */
+      search: '', /* Habilida a barra de pesuisa */
       cabecalhos: [
         {
           text: 'Tarefa',
@@ -57,22 +59,7 @@ export default {
         { text: 'Ultima Execução', value: 'last_run_time' },
         { text: 'Próxima Execução', value: 'next_run_time' },
       ],
-      dados: [],
     }
-  },
-  mounted() {
-    api.get('/scheduler/jobs')
-      .then((res) => {
-        // Conversão da data enviada pela API
-        for(const data of res.data) {
-          data.next_run_time = stringToDate(data.next_run_time)
-          data.last_run_time = stringToDate(data.last_run_time)
-          if(!data.last_run_time) {
-            data.last_run_time = 'Não executado'.toUpperCase()
-          }
-        }
-        this.dados = res.data
-      })
   },
 }
 </script>

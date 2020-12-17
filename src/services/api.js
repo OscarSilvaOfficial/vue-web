@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { environment } from './environment'
 
-
-const api = axios.create({
-  baseURL: 'http://127.0.0.1:5010',
+/* Cria a conexão com o scheduler */
+const schedulerApi = axios.create({
+  baseURL: environment.apiUrl
 })
 
-export default api
+export { schedulerApi }
