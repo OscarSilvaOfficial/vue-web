@@ -42,7 +42,7 @@
 
 export default {
   props: {
-      data: '', /* Recebe todos os dados, e recebe uma lista de objetos */
+    data: '', /* Recebe todos os dados, e recebe uma lista de objetos */
   },
   data() {
     return {

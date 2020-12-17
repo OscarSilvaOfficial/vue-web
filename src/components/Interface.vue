@@ -18,7 +18,6 @@
         <v-tab
           v-for="link in links"
           :key="link"
-          @click="getMenuLink(link)"
         >
          {{ link }}
         </v-tab>
@@ -32,7 +31,7 @@
     <v-main class="grey lighten-3">
       <v-container>
         <v-row>
-          <Table :data="payload"/>
+          <Table :data="payload" />
         </v-row>
       </v-container>
       <Modal />
@@ -57,13 +56,9 @@ export default {
         'Grupo 02',
         'Grupo 03',
       ],
+      link: '',
+      linkMenu: '',
       payload: [],
-      link: [],
-    }
-  },
-  methods: {
-    getMenuLink: args => {
-      return args
     }
   },
   async mounted() {
