@@ -4,8 +4,8 @@ const Jobs = async() => {
   return await schedulerApi.get('/scheduler/jobs')
 }
 
-const GetUserMe = async() => {
-  return await schedulerApi.get('/oauth/user/me')
+const postJob = async(payload) => {
+  return await schedulerApi.post('/scheduler/jobs', payload)
 }
 
-export { Jobs, GetUserMe }
+export { Jobs, postJob }

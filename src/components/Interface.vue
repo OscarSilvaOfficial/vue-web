@@ -18,6 +18,7 @@
         <v-tab
           v-for="link in links"
           :key="link"
+          @click="selectedGroup = link"
         >
          {{ link }}
         </v-tab>
@@ -31,23 +32,22 @@
     <v-main class="grey lighten-3">
       <v-container>
         <v-row>
-          <Table :data="payload" />
+          <Table :data="payload" :groupState="selectedGroup"/>
         </v-row>
       </v-container>
-      <Modal />
+      <InsertModal title="Criar Schedule" />
     </v-main>
   </v-app>
 </template>
 
 <script>
 import Table from './Table';
-import Modal from './Modal'
-import { GetUserMe } from '../services/endpoits'
+import InsertModal from './modal/InsertModal'
 import replaceData from '../utils/replaceData'
 
 export default {
   components: {
-    Table, Modal
+    Table, InsertModal
   },
   data() {
     return {
@@ -57,11 +57,12 @@ export default {
         'Grupo 03',
       ],
       link: '',
-      linkMenu: '',
+      selectedGroup: '',
       payload: [],
     }
   },
   async mounted() {
+    this.selectedGroup = this.links[0] /* Torna o primeiro grupo, o selecionado */
     this.payload = await replaceData() /* Valores recebidos da API para preencher a tabela */
   },
 

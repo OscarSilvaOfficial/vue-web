@@ -52,8 +52,12 @@ function formatTrigger(args) {
     month: isUndefined(args.month),
     day_of_week: isUndefined(args.day_of_week),
   }
+
   const response = `${payload.trigger} ${payload.minute} ${payload.hour} ${payload.day} ${payload.month} ${payload.day_of_week}`
   return response
 }
 
-export { dateToString, formatTrigger }
+function formatHttpMethod(args) {
+  return "jobs:".concat(args.toLowerCase().replace(' ', '_'))
+}
+export { dateToString, formatTrigger, formatHttpMethod }
