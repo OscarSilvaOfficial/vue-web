@@ -1,14 +1,14 @@
 <template>
   <v-row class="modal-scheduler">
     <v-dialog
-      v-model="dialog"
+      v-model="$store.state.click"
       hide-overlay
       transition="slide-x-reverse-transition"
       max-width="50%"
     >
       <v-card height="100%">
         <v-toolbar dark color="teal">
-          <v-btn icon dark @click="dialog = false" >
+          <v-btn icon dark @click="closeModal()" >
             <v-icon>mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title>{{ title }}</v-toolbar-title>
@@ -17,18 +17,20 @@
             <v-btn 
             dark 
             text 
-            v-if="corpo"
+            v-if="data.args[1]"
             @click="postForm(
-              [identificator, tarefa.data, nome, [url, corpo], observacoes,
-               minuto.data, hora.data, dia.data, mes.data, semana.data]
+              [data.id, tarefa.select[data.func == 'jobs:http_get' ? 0 : 1], 
+               nome, [data.args[0], data.args[1]], data.observation,
+               data.minute, data.hour, data.day, data.month, data.day_of_week]
             )">Criar </v-btn>
             <v-btn 
             dark 
             text 
             v-else
             @click="postForm(
-              [identificator, tarefa.data, nome, [url], observacoes,
-               minuto.data, hora.data, dia.data, mes.data, semana.data]
+              [data.id, tarefa.select[data.func == 'jobs:http_get' ? 0 : 1], 
+               nome, [data.args[0]], data.observation,
+               data.minute, data.hour, data.day, data.month, data.day_of_week]
             )">Criar </v-btn>
           </v-toolbar-items>
         </v-toolbar>
@@ -38,53 +40,48 @@
           lazy-validation
           class="form"
         >
-          <v-text-field
-            v-model="identificator"
-            label="Identificador"
-            required
-            class="mini-input"
-          ></v-text-field>
-
           <v-select
-            v-model="tarefa.select[tarefa.data]"
+            :value="tarefa.select[data.func == 'jobs:http_get' ? 0 : 1]"
             :items="tarefa.select"
             label="Tarefa"
             required
-            class="mini-input"
+            class="input-tarefa"
           ></v-select>
 
           <v-text-field
-            v-model="nome"
+            :value="data.name"
+            @mouseout="setName"
+            @mouseover="setName"
             label="Nome da Tarefa"
             required
             class="input"
           ></v-text-field>
 
           <v-text-field
-            v-model="url"
+            :value="data.args[0]"
             label="Recurso/URL"
             required
             class="input"
           ></v-text-field>
 
           <v-text-field
-            v-model="observacoes"
+            :value="data.observation"
             label="Observações"
             required
             class="input"
           ></v-text-field>
 
           <v-text-field
-            v-model="corpo"
+            :value="data.args[1]"
             label="Corpo da Requisição"
             required
             class="input"
-            v-if="tarefa.data == 'http POST'"
+            v-if="tarefa.data == 'jobs:http_post' || tarefa.data == 'http POST'"
           ></v-text-field>
 
           <v-select
             class="mini-input"
-            v-model="minuto.data"
+            :value="minuto.select[selectArray(minuto.select, data.minute)]"
             :items="minuto.select"
             label="Min"
             required
@@ -92,7 +89,7 @@
 
           <v-select
             class="mini-input"
-            v-model="hora.data"
+            :value="hora.select[selectArray(hora.select, data.hour)]"
             :items="hora.select"
             label="Hora"
             required
@@ -100,7 +97,7 @@
 
           <v-select
             class="mini-input"
-            v-model="dia.data"
+            :value="dia.select[selectArray(dia.select, data.day)]"
             :items="dia.select"
             label="Dia"
             required
@@ -108,14 +105,14 @@
 
           <v-select
             class="mini-input"
-            v-model="mes.data"
-            :items="Object.values(mes.select)"
+            :value="mes.select[selectArray(mes.select, data.month)]"
+            :items="mes.select"
             label="Mês"
             required
           ></v-select>
 
           <v-select
-            v-model="semana.data"
+            :value="semana.select[selectArray(semana.select, data.day_of_week)]"
             :items="semana.select"
             label="Semana"
             required
@@ -130,36 +127,30 @@
 
 <script>
 import getNumberRange from '../../utils/getNumberRange'
-import { postJob } from '../../services/endpoits'
+import { patchJob } from '../../services/endpoits'
 import { formatHttpMethod } from '../../utils/format.js'
 
 export default {
   props: {
     data: '',
-    dialog: false,
   },
   data() {
     return {
-      title: 'Criação de Tarefa',
+      title: 'Edição da Tarefa',
       notifications: false,
       sound: true,
       widgets: false,
       btnIcon: "mdi-plus",
 
-      identificator: this.data.id,
+      nome: '',
 
       tarefa: {
-        data: this.data.func == "jobs:http_get" ? 0 : 1,
+        data: '',
         select: [
           'http GET',
           'http POST'
         ],
       },  
-
-      nome: this.data.name,
-      url: this.data.args[0],
-      observacoes: this.data.observation,
-      corpo: this.data.args[1],
 
       minuto:{
         select: getNumberRange(0, 59), /* Arrey com os minutos */
@@ -167,7 +158,7 @@ export default {
       }, 
 
       hora:{
-        select: getNumberRange(0, 24), /* Arrey com a horas */
+        select: getNumberRange(0, 23), /* Arrey com a horas */
         data: ''
       }, 
 
@@ -177,20 +168,7 @@ export default {
       }, 
 
       mes:{
-        select: {
-          Janeiro: 1,
-          Fevereiro: 2,
-          Marco: 3,
-          Abril: 4,
-          Maio: 5,
-          Junho: 6, 
-          Julho: 7,
-          Agosto: 8,
-          Setembro: 9, 
-          Outubro: 10,
-          Novembro: 11,
-          Dezembro: 12  
-        },
+        select: getNumberRange(1, 12),
         data: ''
       },  
 
@@ -203,10 +181,25 @@ export default {
       valid: true,
     };
   },
-
   methods: {
-    validate () {
+    validate() {
       this.$refs.form.validate()
+    },
+    closeModal() {
+      this.$store.commit('changeModal')
+    },
+    setName: function(event) {
+      this.nome = event.target.value
+    },
+    setFunc: function() {
+      return this.tarefa.select[this.data.func == 'jobs:http_get' ? 0 : 1]
+    },
+    selectArray(array, data) {
+      for (let result of array) {
+        if (result == data) {
+          return result
+        }
+      }
     },
     postForm(job) {
       const urls = []
@@ -230,8 +223,8 @@ export default {
         observation: job[4],
         trigger: 'cron',
       } 
-      //console.log(payload)
-      postJob(payload)
+      console.log(payload)
+      patchJob(payload)
         .then((result) => {
           alert(result.data.id)
         })

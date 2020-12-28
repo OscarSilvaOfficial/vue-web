@@ -41,6 +41,7 @@
               >
               </v-checkbox>
             </td>
+            <td>{{ row.item.id }}</td>
             <td>{{ row.item.name }}</td>
             <td>{{ row.item.trigger }}</td>
             <td>
@@ -72,7 +73,7 @@
           'items-per-page-text':'Itens por Página',
         }"
       ></v-data-table> 
-      <EditModal :dialog="click" :data="data[selectedRow]" />
+      <EditModal :data="$store.getters.selectedData" />
     </v-card>
   </div>
 </template>
@@ -90,13 +91,16 @@ export default {
   },
   data() {
     return {
-      click: false,
-      modal: false,
       id: 0,
-      selectedRow: 0,
       singleSelect: true, /* Seleção de multi campos */
       search: '', /* Inicia o campo de pesquisa */
       cabecalhos: [
+        {
+          text: 'Id',
+          align: 'start',
+          sortable: false,
+          value: 'identificator',
+        },
         {
           text: 'Tarefa',
           align: 'start',
@@ -115,17 +119,16 @@ export default {
       if (args == 'NÃO EXECUTADO') return 'red'
       else return 'green'
     },
-
     getRow: function(id) {
-      this.click = this.click == false ? true : false
       const payload = this.data
       for(const data of payload){
         if(data.id == id) {
-          console.log(this.selectedRow)
-          break
+          data.type = 'changeSelectedData'
+          this.$store.commit(data)
+          break 
         }
-        else this.selectedRow++
       }
+      this.$store.commit('changeModal');
     },
   },
 }
