@@ -12,4 +12,19 @@ const patchJob = async (job) => {
   return await schedulerApi.patch(`scheduler/jobs/${job.id}`, {...job, id: undefined});
 };
 
-export { Jobs, postJob, patchJob }
+const removeJob = (id) => {
+  return schedulerApi.delete(`scheduler/jobs/${id}`);
+};
+
+const pauseJob = (id) => {
+  return axios.post(`scheduler/jobs/${id}/pause`);
+};
+
+const resumeJob = (id) => {
+  return axios.post(`scheduler/jobs/${id}/resume`);
+};
+
+const runJob = (id) => {
+  return axios.post(`scheduler/jobs/${id}/run`);
+};
+export { Jobs, postJob, patchJob, removeJob }

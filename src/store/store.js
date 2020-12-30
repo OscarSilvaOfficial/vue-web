@@ -1,15 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import replaceData from '../utils/replaceData'
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    selectedData: {
-      id: 0,
-    },
-    click: false,
+    selectedData: {},
+    modal: false,
+    deleteModal:false,
+    deleteId: 0,
   },
 
   mutations: {
@@ -17,13 +16,19 @@ const store = new Vuex.Store({
       state.selectedData = selectedData
     },
     changeModal(state) {
-      state.click = state.click == false ? true : false
+      state.modal = state.modal == false ? true : false
+    },
+    changeDeleteModal(state, id) {
+      state.deleteModal = state.deleteModal == false ? true : false
+      state.deleteId = id
     },
   },
 
   getters: {
     selectedData: state => state.selectedData,
-    click: state => state.click,
+    modal: state => state.modal,
+    deleteModal: state => state.deleteModal,
+    deleteId: state => state.deleteId,
   }
 })
 

@@ -33,7 +33,7 @@ function dateToString(args) {
 
     return response
   } 
-  else return 'Não executado'.toUpperCase();
+  else return 'Não executando'.toUpperCase();
 }
 
 function formatTrigger(args) {
