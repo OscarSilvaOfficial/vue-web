@@ -15,9 +15,9 @@ const replaceData = async () => {
       hour: data.hour,
       day: data.day,
       month: data.month,
-      day_of_week: data.day_of_week
+      day_of_week: data.day_of_week,
+      group: data.group,
     })
-    data.group = 'Grupo 01'
   } return response.data;
 }
 

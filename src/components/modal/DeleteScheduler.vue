@@ -8,7 +8,7 @@
           >
             <v-card>
               <v-card-title class="headline">
-                Deseja deletar?
+              ID {{ id }} será deletado
               </v-card-title>
               <v-card-text></v-card-text>
               <v-card-actions>
@@ -23,7 +23,7 @@
                 <v-btn
                   color="green darken-1"
                   text
-                  @click="$store.state.deleteModal = false"
+                  @click="closeModal"
                 >
                   Cancelar
                 </v-btn>
@@ -39,19 +39,25 @@ import { removeJob } from '../../services/endpoits'
 
 
 export default {
+  props: {
+    id: 0
+  },
 
-methods: {
-  deleteForm() { 
-    removeJob(this.$store.getters.deleteId)
-      .then(result => {
-        console.log('Deletado')
-        location.reload()
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  },  
-},
+  methods: {
+    deleteForm: function() { 
+      removeJob(this.id)
+        .then(result => {
+          alert(`Objeto com o ${this.id} foi deletado`)
+          location.reload()
+        })
+        .catch((error) => {
+          return error
+        })
+    },  
+    closeModal: function() {
+      this.$store.commit('changeDeleteModal', false)
+    }
+  },
 }
 </script>
 
