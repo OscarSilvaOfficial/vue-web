@@ -115,6 +115,13 @@
               required
             ></v-select>
 
+            <v-select
+              v-model="$store.state.groupForm.data"
+              :items="$store.getters.groupForm.names"
+              label="Grupo"
+              required
+            ></v-select>
+
           </v-form>
         </v-card>
       </v-dialog>
@@ -137,28 +144,7 @@
             <v-btn
               color="green darken-1"
               text
-              v-if="$store.state.corpo"
-              @click="postForm(
-                [$store.state.identificator, $store.state.tarefa.data,
-                $store.state.nome, [$store.state.url, $store.state.corpo],
-                $store.state.observacoes, $store.state.minuto.data, 
-                $store.state.hora.data, $store.state.dia.data, 
-                $store.state.mes.data, $store.state.semana.data]
-                )"
-            >
-              Confirmar
-            </v-btn>
-            <v-btn
-              color="green darken-1"
-              text
-              v-else
-              @click="postForm(
-                [$store.state.identificator, $store.state.tarefa.data,
-                $store.state.nome, [$store.state.url],
-                $store.state.observacoes, $store.state.minuto.data, 
-                $store.state.hora.data, $store.state.dia.data, 
-                $store.state.mes.data, $store.state.semana.data]
-                )"
+              @click="postForm()"
             >
               Confirmar
             </v-btn>
@@ -198,39 +184,56 @@ export default {
       this.showConfirmedInsert = true
     },
 
+    getGroupId(name) {
+      let counter = 0
+      for (let n of this.$store.getters.groups) {
+        counter++
+        console.log(n.name)
+        if (name == n.name) {
+          break
+        }
+      }
+      return counter
+    },
+
     validate: function() {
       this.$refs.form.validate()
     },
 
     postForm: function(job) {
-      const urls = []
-      for(let i of job[3]){
-        urls.push(i)
-      } 
-
       const payload = {
-        args: urls,
-        day: job[7],
-        day_of_week: job[9],
-        func: formatHttpMethod(job[1]),
-        hour: job[6],
-        id: job[0],
+        args: this.$store.state.corpo ? [this.$store.state.url, this.$store.state.corpo]:[this.$store.state.url],
+        day: this.$store.state.dia.data,
+        day_of_week: this.$store.state.semana.data,
+        func: formatHttpMethod(this.$store.state.tarefa.data),
+        hour: this.$store.state.hora.data,
+        id: this.$store.state.identificator,
         kwargs: {
           headers: {}
         },
-        minute: job[5],
-        month: job[8].toString(),
-        name: job[2],
-        observation: job[4],
+        minute: this.$store.state.minuto.data,
+        month: this.$store.state.mes.data.toString(),
+        name: this.$store.state.nome,
+        observation: this.$store.state.observacoes,
         trigger: 'cron',
-      } 
-
+        group_id: this.getGroupId(this.$store.state.groupForm.data), 
+      }
       postJob(payload)
         .then((result) => {
-          alert(`Tarefa inserida`)
-          location.reload();
+          this.$store.commit('changeSuccessModal', {
+            text: 'inserida',
+            status: result.status,
+            boolean: true
+          })
+          this.dialog = false
+          this.showConfirmedInsert = false
         })
         .catch((error) => {
+          this.$store.commit('changeSuccessModal', {
+            text: 'não inserida',
+            status: error,
+            boolean: true
+          })
           alert(error)
         })
     },

@@ -4,11 +4,7 @@
       color="#6be68e"
       flat
     >
-      <v-avatar
-        color="primary"
-        size="40"
-      ><img src="/quiteja-icon.png" alt="QuiteJá"></v-avatar>
-
+      <p class="scheduler-text">SCHEDULER</p> 
       <v-tabs
         centered
         class="ml-n9"
@@ -33,7 +29,7 @@
 </template>
 
 <script>
-import { groups } from '../../services/endpoits'
+import { getGroups } from '../../services/endpoits'
 
 export default {
 
@@ -44,7 +40,7 @@ export default {
   },
 
   beforeCreate: async function() {
-    this.groups = await groups()
+    this.groups = await getGroups()
     this.groups.data.forEach(groupInfo => {
       this.$store.commit('changeGroups', groupInfo)
     });
@@ -67,5 +63,13 @@ export default {
 </script>
 
 <style>
+
+.scheduler-text {
+  font-family: 'Audiowide', cursive;
+  font-weight: 400;
+  font-size: 2rem;
+  position: relative;
+  top: 10%;
+}
 
 </style>

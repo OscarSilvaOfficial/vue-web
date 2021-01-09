@@ -1,6 +1,6 @@
 import { schedulerApi } from './api'
 
-const Jobs = async () => {
+const getJobs = async () => {
   return await schedulerApi.get('scheduler/jobs')
 };
 
@@ -28,7 +28,7 @@ const runJob = (id) => {
   return schedulerApi.post(`scheduler/jobs/${id}/run`);
 };
 
-const groups = () => {
+const getGroups = () => {
   return schedulerApi.get(`scheduler/groups`)
 }
 
@@ -36,6 +36,16 @@ const postGroup = (payload) => {
   return schedulerApi.post(`scheduler/groups`, payload)
 }
 
-export { Jobs, postJob, patchJob, removeJob,
-         runJob, resumeJob, pauseJob, groups,
-          postGroup }
+const getLogs = (id) => {
+  return schedulerApi.get(`scheduler/logs/${id}`)
+}
+
+const postLog = (payload) => {
+  return schedulerApi.post(`scheduler/logs`, payload)
+}
+
+export {
+    getJobs, postJob, patchJob, removeJob,
+    runJob, resumeJob, pauseJob, getGroups,
+    postGroup, postLog, getLogs,
+  }

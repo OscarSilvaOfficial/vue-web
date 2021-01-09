@@ -1,8 +1,8 @@
-import { Jobs } from '../services/endpoits';
+import { getJobs } from '../services/endpoits';
 import { dateToString, formatTrigger } from './format'
 
 const replaceData = async () => {
-  const response = await Jobs();
+  const response = await getJobs();
   
   for(const data of response.data) {
     /* Conversão da data enviada pela API */
@@ -16,7 +16,7 @@ const replaceData = async () => {
       day: data.day,
       month: data.month,
       day_of_week: data.day_of_week,
-      group: data.group,
+      group_id: data.group_id,
     })
   } return response.data;
 }

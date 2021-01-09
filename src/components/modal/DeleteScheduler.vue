@@ -47,11 +47,19 @@ export default {
     deleteForm: function() { 
       removeJob(this.id)
         .then(result => {
-          alert(`Objeto com o ${this.id} foi deletado`)
-          location.reload()
+          this.$store.commit('changeSuccessModal', {
+            text: 'deletada',
+            status: result.status,
+            boolean: true
+          })
+          this.$store.commit('changeDeleteModal', false)
         })
         .catch((error) => {
-          return error
+          this.$store.commit('changeErrorModal', {
+            text: 'não deletada',
+            status: error,
+            boolean: true
+          })
         })
     },  
     closeModal: function() {

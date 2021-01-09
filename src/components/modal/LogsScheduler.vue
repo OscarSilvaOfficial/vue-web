@@ -16,10 +16,13 @@
             <v-toolbar-title>Logs</v-toolbar-title>
           </v-toolbar>
           <div class="terminal">
-            <div class="logs" v-for="log in $store.state.logs" :key="log.id">
-              <span class="log-host">schedulerLog</span>
-              <span class="arrow">➜</span> 
-              <span class="log-msg">{{ log }}</span><br/>
+            <div class="logs" v-for="data in this.$store.getters.logs" :key="data.id">
+              <p>
+                <span class="log-host">schedulerLog</span>
+                <span class="arrow">➜</span> 
+                <span class="log-msg">{{ data.log }}</span>
+              </p>
+              <br/>
             </div>
           </div>
         </v-card>
@@ -29,20 +32,25 @@
 </template>
 
 <script>
-export default {
-
-}
+export default {}
 </script>
 
 <style>
 .terminal {
-  height: 15rem;
+  height: 10rem;
   font-size: 100%;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 .logs {
-  margin: 2% auto 2% 2%;
+  margin: 0% auto 0% 0%;
+  background-color: #2E3436 !important;
+  position: relative;
+}
+
+.logs p {
+  margin-left: 2%;
+  height: 0rem;
 }
 
 .arrow {

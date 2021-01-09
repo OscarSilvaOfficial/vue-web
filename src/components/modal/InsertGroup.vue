@@ -50,11 +50,14 @@ export default {
 
   methods: {
     postForm: function() {
-      this.$store.commit('changeGroup', this.group)
       const payload = {
-        name: this.$store.getters.group
+        name: this.group
       }
       postGroup(payload)
+      .then(result => {
+        this.$store.commit('changeGroups', {name: this.group})
+      })
+      
     }
   },
 }

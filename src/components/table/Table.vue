@@ -4,7 +4,6 @@
       <div class="data-table">
         <v-card>
           <v-card-title v-show="$store.getters.showToolBar == false">
-
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -16,29 +15,29 @@
           </v-card-title>
           <Toolbar :id="id"/>
           <v-data-table
-            :headers="cabecalhos"
-            :items="data"
-            item-key="name"
-            show-select
-            :single-select="singleSelect"
+            fixed-header
             class="elevation-1"
+            item-key="id"
+            show-select
+            height="700px"
+            :headers="headers"
+            :items="$store.getters.apiData"
+            :single-select="singleSelect"
             :search="search"
+            :items-per-page="1000"
             :footer-props="{
-              showFirstLastPage: true,
+              showFirstLastPage: false,
               firstIcon: 'mdi-arrow-collapse-left',
               lastIcon: 'mdi-arrow-collapse-right',
-              prevIcon: 'mdi-minus',
-              nextIcon: 'mdi-plus',
+              prevIcon: 'mdi-arrow-left',
+              nextIcon: 'mdi-arrow-right',
               'items-per-page-text':'Itens por Página',
             }"
           >
             <template v-slot:item="row">
-              <tr v-if="getSelectedGroup() == row.item.group">
+              <tr v-show="getSelectedGroup() == row.item.group_id">
                 <td>
-                  <v-checkbox
-                    @click="showToolBar(row.item.id)"
-                  >
-                  </v-checkbox>
+                  <v-checkbox @click="showToolBar(row.item.id)"></v-checkbox>
                 </td>
                 <td>{{ row.item.id }}</td>
                 <td>{{ row.item.name }}</td>
@@ -97,7 +96,7 @@ export default {
       search: '', /* Inicia o campo de pesquisa */
       id: 0,
       singleSelect: true, /* Seleção de multi campos */
-      cabecalhos: [
+      headers: [
         {
           text: 'Id',
           align: 'start',
@@ -117,8 +116,9 @@ export default {
     }
   },
 
-  async mounted() {
-    this.data = await replaceData()
+  beforeMount: async function() {
+    const data = await replaceData()
+    this.$store.commit('changeApiData', data)
   },
 
   methods: {
@@ -143,7 +143,6 @@ export default {
     },
 
     getSelectedGroup: function() {
-      console.log(this.$store.getters.selectedGroup)
       return this.$store.getters.selectedGroup
     }
   }
@@ -154,6 +153,7 @@ export default {
 <style>
 .data-table {
   width: 100%;
+  height: 200px !important;
 }
 .search-bar {
   width: 50%;

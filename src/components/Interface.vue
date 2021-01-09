@@ -5,6 +5,8 @@
       <Table />
       <InsertScheduler />
       <InsertGroup />
+      <Success />
+      <Error />
     </v-main>
   </v-app>
 </template>
@@ -14,6 +16,8 @@ import Menu from './menu/Menu'
 import Table from './table/Table'
 import InsertGroup from './modal/InsertGroup'
 import InsertScheduler from './modal/InsertScheduler'
+import Success from './modal/jobExecConfirm/JobSuccess'
+import Error from './modal/jobExecConfirm/JobError'
 
 import { formatHttpMethod } from '../utils/format.js'
 import getNumberRange from '../utils/getNumberRange'
@@ -25,7 +29,9 @@ export default {
     Menu, 
     InsertScheduler, 
     InsertGroup, 
-    Table
+    Table,
+    Success,
+    Error,
   },
 }
 </script>

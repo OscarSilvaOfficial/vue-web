@@ -34,7 +34,7 @@
       <v-btn
         depressed
         color="primary"
-        @click="run()"
+        @click="resume()"
         class="toolbar-btn"
       >
         <v-icon left dark>
@@ -59,7 +59,7 @@
   </v-card>
 </template>
 <script>
-import { runJob, resumeJob, pauseJob } from '../../services/endpoits'
+import { runJob, resumeJob, pauseJob, postLog, getLogs } from '../../services/endpoits'
 import LogsScheduler from '../modal/LogsScheduler'
 
 export default {
@@ -73,35 +73,92 @@ export default {
     run: function() {
       runJob(this.id)
       .then(result => {
-        this.$store.commit('setLog', `Tarefa cujo id é ${this.id} está rodando`)
+        this.$store.commit('changeSuccessModal', {
+          text: 'executada',
+          status: result.status,
+          boolean: true
+        })
+        const payload = {
+          schedule_id: this.id,
+          log: `Tarefa com o id ${this.id} foi enviada para execução.`
+        }
+        postLog(payload)
       })
       .catch(error => {
-        this.$store.commit('setLog', `Tarefa cujo id é ${this.id} aprensentou erro ao rodar`)
+        this.$store.commit('changeErrorModal', {
+          text: 'não executada',
+          status: error,
+          boolean: true
+        })
+        const payload = {
+          schedule_id: this.id,
+          log: `Tarefa com o id ${this.id} não foi executada.`
+        }
+        postLog(payload)
       }) 
     },
 
     resume: function() {
       resumeJob(this.id)
       .then(result => {
-        this.$store.commit('setLog', `Tarefa cujo id é ${this.id} foi removido`)
+        this.$store.commit('changeSuccessModal', {
+          text: 'ativada',
+          status: result.status,
+          boolean: true
+        })
+        const payload = {
+          schedule_id: this.id,
+          log: `Tarefa com o id ${this.id} foi retomada.`
+        }
+        postLog(payload)
       })
       .catch(error => {
-        this.$store.commit('setLog', `Tarefa cujo id é ${this.id} não pode ser removido`)
+        this.$store.commit('changeSuccessModal', {
+          text: 'não ativada',
+          status: result.status,
+          boolean: true
+        })
+        const payload = {
+          schedule_id: this.id,
+          log: `Tarefa com o id ${this.id} não pode prosseguir.`
+        }
+        postLog(payload)
       }) 
     },
 
     pause: function() {
       pauseJob(this.id)
       .then(result => {
-        this.$store.commit('setLog', `Tarefa cujo id é ${this.id} está pausada`)
+        this.$store.commit('changeSuccessModal', {
+          text: 'pausada',
+          status: result.status,
+          boolean: true
+        })
+        const payload = {
+          schedule_id: this.id,
+          log: `Tarefa com o id ${this.id} foi pausada.`
+        }
+        postLog(payload)
       })
       .catch(error => {
-        this.$store.commit('setLog', `Tarefa cujo id é ${this.id} não pode ser pausada`)
+        this.$store.commit('changeSuccessModal', {
+          text: 'não pausada',
+          status: result.status,
+          boolean: true
+        })
+        const payload = {
+          schedule_id: this.id,
+          log: `Tarefa com o id ${this.id} não pode ser pausada.`
+        }
+        postLog(payload)
       }) 
     },
 
-    logs: function() {
+    logs: async function() {
+      this.$store.commit('setScheduleId', this.id)
       this.$store.commit('changeModalLogs', true)
+      const logs = await getLogs(this.$store.getters.schedule_id)
+      this.$store.commit('setLogs', logs.data);  
     }
   },
 }

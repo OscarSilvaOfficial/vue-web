@@ -7,9 +7,9 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    /* Table */
     apiData: [],
-    logs: [],
+    logs: '',
+    schedule_id: 0,
 
     selectedData: {},
     modal: false,
@@ -19,9 +19,7 @@ const store = new Vuex.Store({
     modalLogs: false,
 
     /* Menu */
-    group: '',
     groups: [],
-
     selectedGroup: '',
     groupModal: false,
 
@@ -69,15 +67,48 @@ const store = new Vuex.Store({
 
     fullWidth: false,
     valid: true,
+
+    successModal:{
+      show: false,
+      data: '',
+    } ,
+
+    errorModal: {
+      show: false,
+      data: '',
+    },
+
+    groupForm: {
+      data: '',
+      names: [],
+      id: [],
+    },
   },
 
   mutations: {
-    setLog(state, log) {
-      state.logs.push(log)
+    setLogs(state, log) {
+      state.logs = log
     },
 
-    changeGroup(state, group) {
-      state.group = group
+    setScheduleId(state, id) {
+      state.schedule_id = id
+    },
+
+    changeSuccessModal(state, data) {
+      state.successModal.show = data.boolean
+      state.successModal.data = `Tarefa ${data.text} | Status: ${data.status}`
+      setTimeout(function() { 
+        state.successModal.show = false
+      }, 3000)
+    },
+
+    
+    changeErrorModal(state, data) {
+      state.errorModal.show = data.boolean
+      state.errorModal.data = `Tarefa ${data.text} | Status: ${data.status}`
+      setTimeout(function() { 
+        state.errorModal.show = false
+      }, 3000)
     },
 
     changeSelectedData(state, selectedData) {
@@ -102,6 +133,8 @@ const store = new Vuex.Store({
 
     changeGroups(state, group) {
       state.groups.push(group)
+      state.groupForm.names.push(group.name)
+      state.groupForm.id.push(group.id)
     },
 
     changeSelectedGroup(state, group) {
@@ -133,6 +166,9 @@ const store = new Vuex.Store({
 
 
   getters: {
+    successModal: state => state.successModal,
+    errorModal: state => state.errorModal,
+    schedule_id: state => state.schedule_id,
     showToolBar: state => state.showToolBar,
     logs: state => state.logs,
     selectedData: state => state.selectedData,
@@ -159,8 +195,8 @@ const store = new Vuex.Store({
     mesSelect: state => state.mes.select,
     semanaData: state => state.semana.data,
     semanaSelect: state => state.semana.select,
-    group: state => state.group
-  }
+    groupForm: state => state.groupForm
+    }
 })
 
 export { store }
