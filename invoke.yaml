@@ -1,0 +1,8 @@
+version: '0.1.0'
+product: 'scheduler'
+component: 'scheduler_app_web'
+container: 'scheduler/scheduler_app_web'
+version_update_files: [
+            ['invoke.yaml', "^version.+", "version: '{version}'"],
+            ['package.json', '.+"version":.+', '  "version": "{version}",']
+        ]

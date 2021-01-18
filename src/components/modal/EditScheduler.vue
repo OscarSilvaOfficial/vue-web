@@ -2,7 +2,7 @@
   <div>
     <v-row class="modal-scheduler">
       <v-dialog
-        v-model="$store.state.editModal"
+        v-model="$store.getters.editModal"
         hide-overlay
         transition="slide-x-reverse-transition"
         max-width="50%"
@@ -28,94 +28,91 @@
             lazy-validation
             class="form"
           >
-            <v-text-field
-              v-model="$store.state.identificator"
-              label="Identificador"
-              required
-            ></v-text-field>
 
             <v-select
-              v-model="$store.state.tarefa.data"
-              :items="$store.state.tarefa.select"
+              v-model="func"
+              :items="$store.getters.tarefaSelect"
               label="Tarefa"
               required
+              class="input"
             ></v-select>
 
             <v-text-field
-              v-model="$store.state.nome"
+              v-model="name"
               label="Nome da Tarefa"
               required
+              class="input"
             ></v-text-field>
 
             <v-text-field
-              v-model="$store.state.url"
+              v-model="url"
               label="Recurso/URL"
               required
+              class="input"
             ></v-text-field>
 
             <v-text-field
-              v-model="$store.state.observacoes"
-              label="Observações"
-              required
-            ></v-text-field>
-
-            <v-text-field
-              v-model="$store.state.corpo"
+              v-model="body"
               label="Corpo da Requisição"
               required
-              v-if="$store.state.tarefa.data == 'http POST'"
+              v-if="httpMethod() == 'http POST'"
+              class="input"
             ></v-text-field>
 
             <v-select
-              v-model="$store.state.minuto.data"
-              :items="$store.state.minuto.select"
+              v-model="minute"
+              :items="$store.getters.minutoSelect"
               label="Min"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.hora.data"
-              :items="$store.state.hora.select"
+              v-model="hour"
+              :items="$store.getters.horaSelect"
               label="Hora"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.dia.data"
-              :items="$store.state.dia.select"
+              v-model="day"
+              :items="$store.getters.diaSelect"
               label="Dia"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.mes.data"
-              :items="$store.state.mes.select"
+              v-model="month"
+              :items="$store.getters.mesSelect"
               label="Mês"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.semana.data"
-              :items="$store.state.semana.select"
+              v-model="week"
+              :items="$store.getters.semanaSelect"
               label="Semana"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.semana.data"
-              :items="$store.state.semana.select"
-              label="Semana"
-              required
-            ></v-select>
-
-            <!-- Arrumar Gambi -->
-            <v-select
-              v-model="this.$store.state.groupForm.data = this.$store.getters.groupForm.names[this.$store.getters.selectedGroup-1]"
-              :items="$store.getters.groupForm.names"
+              v-model="groups"
+              :items="$store.getters.groupFormNames"
               label="Grupo"
               required
+              class="input"
             ></v-select>
 
+            <v-text-field
+              v-model="observation"
+              label="Observações"
+              required
+              class="input"
+            ></v-text-field>
           </v-form>
         </v-card>
       </v-dialog>
@@ -157,68 +154,195 @@
 </template>
 
 <script>
-import { formatHttpMethod } from '../../utils/format.js'
+import { formatHttpMethod, dateToString } from '../../utils/format.js'
 import { patchJob } from '../../services/endpoits'
+
 
 export default {
 
   data() {
     return {
       showConfirmedInsert: false,
-      dialog: false,
       notifications: false,
       sound: true,
       widgets: false,
       valid: true,
     }
   },
+  
+  mounted: function() {
+    this.$store.commit('changeGroupForm', this.$store.getters.selectedGroup)
+  },
+
+  computed: {
+    groups: {
+      get() {
+        return this.$store.getters.groupFormNames[this.$store.getters.selectedGroup-1]
+      },
+      set(value) {
+        for (let group of this.$store.getters.groups) {
+          if (group.name == value) {
+            this.$store.commit('changeGroupForm', group.id)
+          }
+        }
+      }
+    },
+    identificator: {
+      get() {
+        return this.$store.getters.identificator
+      },
+      set(value) {
+        this.$store.commit('setId', value)
+      }
+    },
+    func: {
+      get() {
+        return this.$store.getters.tarefaData
+      },
+      set(func) {
+        this.$store.commit('setFunc', func)
+      }
+    },
+    name: {
+      get() {
+        return this.$store.getters.nome
+      },
+      set(value) {
+        this.$store.commit('setName', value)
+      }
+    },
+    url: {
+      get() {
+        return this.$store.getters.url
+      },
+      set(value) {
+        this.$store.commit('setUrl', value)
+      }
+    },
+    observation: {
+      get() {
+        return this.$store.getters.observacoes
+      },
+      set(value) {
+        this.$store.commit('setObservation', value)
+      }
+    },
+    body: {
+      get() {
+        return this.$store.getters.corpo
+      },
+      set(value) {
+        this.$store.commit('setBody', value)
+      }
+    },
+    name: {
+      get() {
+        return this.$store.getters.nome
+      },
+      set(value) {
+        return this.$store.commit('setName', value)
+      }
+    },
+    minute: {
+      get() {
+        return this.$store.getters.minutoData
+      },
+      set(value) {
+        this.$store.commit('setMinute', value)
+      }
+    },
+    hour: {
+      get() {
+        return this.$store.getters.horaData
+      },
+      set(value) {
+        this.$store.commit('setHour', value)
+      }
+    },
+    day: {
+      get() {
+        return this.$store.getters.diaData
+      },
+      set(value) {
+        this.$store.commit('setDay', value)
+      }
+    },
+    month: {
+      get() {
+        return this.$store.getters.mesData
+      },
+      set(value) {
+        this.$store.commit('setMonth', value)
+      }
+    },
+    week: {
+      get() {
+        return this.$store.getters.semanaData
+      },
+      set(value) {
+        this.$store.commit('setWeek', value)
+      }
+    },
+  },
 
   methods: {
+    httpMethod: function() {
+      return this.$store.getters.tarefaData
+    },
     confirmForm: function() {
       this.showConfirmedInsert = true
     },
 
-    validate: function() {
-      this.$refs.form.validate()
-    },
-
-    getGroupId(name) {
-      let counter = 0
-      for (let n of this.$store.getters.groups) {
-        counter++
-        console.log(n.name)
-        if (name == n.name) {
-          break
-        }
-      }
-      return counter
-    },
-
     postForm: function() {
+      
       const payload = {
-        args: this.$store.state.corpo ? [this.$store.state.url, this.$store.state.corpo]:[this.$store.state.url],
-        day: this.$store.state.dia.data,
-        day_of_week: this.$store.state.semana.data,
-        func: formatHttpMethod(this.$store.state.tarefa.data),
-        hour: this.$store.state.hora.data,
-        id: this.$store.state.identificator,
+        args: this.$store.getters.corpo ? [this.$store.getters.url, this.$store.getters.corpo]:[this.$store.getters.url],
+        day: this.$store.getters.diaData,
+        day_of_week: this.$store.getters.semanaData,
+        func: formatHttpMethod(this.$store.getters.tarefaData),
+        hour: this.$store.getters.horaData,
+        id: this.$store.getters.identificator,
         kwargs: {
           headers: {}
         },
-        minute: this.$store.state.minuto.data,
-        month: this.$store.state.mes.data.toString(),
-        name: this.$store.state.nome,
-        observation: this.$store.state.observacoes,
+        minute: this.$store.getters.minutoData,
+        month: this.$store.getters.mesData.toString(),
+        name: this.$store.getters.nome,
+        observation: this.$store.getters.observacoes,
         trigger: 'cron',
-        group_id: this.getGroupId(this.$store.state.groupForm.data), 
+        group_id: this.$store.getters.groupFormData,
       } 
       patchJob(payload)
-        .then((result) => {
-          alert(`Tarefa alterada`)
-          /* location.reload(); */
+        .then(result => {
+          this.$store.commit('changeSuccessModal', {
+            text: 'editada',
+            status: result.status,
+            boolean: true
+          })
+
+          /* Altera os dados da tabela em tempo real */
+          payload.next_run_time = dateToString(result.data.next_run_time)
+          payload.last_run_time = dateToString(result.data.last_run_time)
+          this.$store.commit('refactorApiData', payload)
+          
+          /* Fecha os modais */
+          this.$store.commit('changeEditModal', false)
+          this.showConfirmedInsert = false
+
+          /* 
+          Desabilida as checkboxes selecionadas 
+          */
+          this.$store.commit('changeCheckBox', true)
+                    
         })
         .catch((error) => {
-          alert(error)
+          this.$store.commit('changeErrorModal', {
+            text: 'não editada',
+            status: error.status,
+            boolean: true
+          })
+          this.$store.commit('changeEditModal', false)
+          this.showConfirmedInsert = false
         })
     },
   }
@@ -247,7 +371,7 @@ export default {
 }
 
 .mini-input {
-  width: 50%;
+  width: 20%;
   padding: 1%;
   display: inline-block;
   position: relative;
