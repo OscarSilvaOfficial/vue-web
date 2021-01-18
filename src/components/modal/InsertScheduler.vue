@@ -43,84 +43,96 @@
             class="form"
           >
             <v-text-field
-              v-model="$store.state.identificator"
+              v-model="identificator"
               label="Identificador"
               required
+              class="mini-input-top"
             ></v-text-field>
 
             <v-select
-              v-model="$store.state.tarefa.data"
-              :items="$store.state.tarefa.select"
+              v-model="func"
+              :items="$store.getters.tarefaSelect"
               label="Tarefa"
               required
+              class="mini-input-top"
             ></v-select>
 
             <v-text-field
-              v-model="$store.state.nome"
+              class="input"
+              v-model="name"
               label="Nome da Tarefa"
               required
             ></v-text-field>
 
             <v-text-field
-              v-model="$store.state.url"
+              class="input"
+              v-model="url"
               label="Recurso/URL"
               required
             ></v-text-field>
-
+            
             <v-text-field
-              v-model="$store.state.observacoes"
-              label="Observações"
-              required
-            ></v-text-field>
-
-            <v-text-field
-              v-model="$store.state.corpo"
+              class="input"
+              v-model="body"
               label="Corpo da Requisição"
               required
-              v-if="$store.state.tarefa.data == 'http POST'"
+              v-if="httpMethod() == 'http POST'"
             ></v-text-field>
 
             <v-select
-              v-model="$store.state.minuto.data"
-              :items="$store.state.minuto.select"
+              v-model="minute"
+              :items="$store.getters.minutoSelect"
               label="Min"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.hora.data"
-              :items="$store.state.hora.select"
+              v-model="hour"
+              :items="$store.getters.horaSelect"
               label="Hora"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.dia.data"
-              :items="$store.state.dia.select"
+              v-model="day"
+              :items="$store.getters.diaSelect"
               label="Dia"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.mes.data"
-              :items="$store.state.mes.select"
+              v-model="month"
+              :items="$store.getters.mesSelect"
               label="Mês"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.semana.data"
-              :items="$store.state.semana.select"
+              v-model="week"
+              :items="$store.getters.semanaSelect"
               label="Semana"
               required
+              class="mini-input"
             ></v-select>
 
             <v-select
-              v-model="$store.state.groupForm.data"
-              :items="$store.getters.groupForm.names"
+              v-model="groups"
+              :items="$store.getters.groupFormNames"
               label="Grupo"
               required
+              class="input"
             ></v-select>
+
+            <v-text-field
+              v-model="observation"
+              label="Observações"
+              required
+              class="input"
+            ></v-text-field>
 
           </v-form>
         </v-card>
@@ -163,7 +175,7 @@
 </template>
 
 <script>
-import { formatHttpMethod } from '../../utils/format.js'
+import { formatHttpMethod, dateToString } from '../../utils/format'
 import { postJob } from '../../services/endpoits'
 
 export default {
@@ -179,45 +191,152 @@ export default {
     }
   },
 
-  methods: {
-    confirmForm: function() {
-      this.showConfirmedInsert = true
-    },
-
-    getGroupId(name) {
-      let counter = 0
-      for (let n of this.$store.getters.groups) {
-        counter++
-        console.log(n.name)
-        if (name == n.name) {
-          break
+  computed: {
+    groups: {
+      get() {
+        return this.$store.getters.groupFormNames
+      },
+      set(value) {
+        for (let group of this.$store.getters.groups) {
+          if (group.name == value) {
+            this.$store.commit('changeGroupForm', group.id)
+          }
         }
       }
-      return counter
+    },
+    identificator: {
+      get() {
+        return this.$store.getters.identificator
+      },
+      set(value) {
+        this.$store.commit('setId', value)
+      }
+    },
+    func: {
+      get() {
+        return this.$store.getters.tarefaData
+      },
+      set(func) {
+        this.$store.commit('setFunc', func)
+      }
+    },
+    name: {
+      get() {
+        return this.$store.getters.nome
+      },
+      set(value) {
+        this.$store.commit('setName', value)
+      }
+    },
+    url: {
+      get() {
+        return this.$store.getters.url
+      },
+      set(value) {
+        this.$store.commit('setUrl', value)
+      }
+    },
+    observation: {
+      get() {
+        return this.$store.getters.observacoes
+      },
+      set(value) {
+        this.$store.commit('setObservation', value)
+      }
+    },
+    body: {
+      get() {
+        return this.$store.getters.corpo
+      },
+      set(value) {
+        this.$store.commit('setBody', value)
+      }
+    },
+    name: {
+      get() {
+        return this.$store.getters.nome
+      },
+      set(value) {
+        return this.$store.commit('setName', value)
+      }
+    },
+    minute: {
+      get() {
+        return this.$store.getters.minutoData
+      },
+      set(value) {
+        this.$store.commit('setMinute', value)
+      }
+    },
+    hour: {
+      get() {
+        return this.$store.getters.horaData
+      },
+      set(value) {
+        this.$store.commit('setHour', value)
+      }
+    },
+    day: {
+      get() {
+        return this.$store.getters.diaData
+      },
+      set(value) {
+        this.$store.commit('setDay', value)
+      }
+    },
+    month: {
+      get() {
+        return this.$store.getters.mesData
+      },
+      set(value) {
+        this.$store.commit('setMonth', value)
+      }
+    },
+    week: {
+      get() {
+        return this.$store.getters.semanaData
+      },
+      set(value) {
+        this.$store.commit('setWeek', value)
+      }
+    },
+  },
+
+  methods: {
+
+    httpMethod: function() {
+      /* 
+        Verifica o metodo HTTP que o 
+        job será cadastrado
+      */
+      return this.$store.getters.tarefaData
     },
 
-    validate: function() {
-      this.$refs.form.validate()
+    confirmForm: function() {
+      /* 
+        Mostra o formulário de confirmação
+      */
+      this.showConfirmedInsert = true
     },
 
     postForm: function(job) {
       const payload = {
-        args: this.$store.state.corpo ? [this.$store.state.url, this.$store.state.corpo]:[this.$store.state.url],
-        day: this.$store.state.dia.data,
-        day_of_week: this.$store.state.semana.data,
-        func: formatHttpMethod(this.$store.state.tarefa.data),
-        hour: this.$store.state.hora.data,
-        id: this.$store.state.identificator,
+        args: this.$store.getters.corpo ? [this.$store.getters.url, this.$store.getters.corpo]:[this.$store.getters.url],
+        day: this.$store.getters.diaData,
+        day_of_week: this.$store.getters.semanaData,
+        func: formatHttpMethod(this.$store.getters.tarefaData),
+        hour: this.$store.getters.horaData,
+        id: this.$store.getters.identificator,
         kwargs: {
           headers: {}
         },
-        minute: this.$store.state.minuto.data,
-        month: this.$store.state.mes.data.toString(),
-        name: this.$store.state.nome,
-        observation: this.$store.state.observacoes,
+        minute: this.$store.getters.minutoData,
+        month: this.$store.getters.mesData.toString(),
+        name: this.$store.getters.nome,
+        observation: this.$store.getters.observacoes,
         trigger: 'cron',
-        group_id: this.getGroupId(this.$store.state.groupForm.data), 
-      }
+        group_id: this.$store.getters.groupFormData,
+      } 
       postJob(payload)
         .then((result) => {
           this.$store.commit('changeSuccessModal', {
@@ -225,16 +344,20 @@ export default {
             status: result.status,
             boolean: true
           })
+          /* Atualiza o valor em tempo real */
+          payload.next_run_time = dateToString(result.data.next_run_time)
+          payload.last_run_time = dateToString(result.data.last_run_time)
+          this.$store.commit('changeApiData', payload)
           this.dialog = false
           this.showConfirmedInsert = false
         })
         .catch((error) => {
-          this.$store.commit('changeSuccessModal', {
+          this.$store.commit('changeErrorModal', {
             text: 'não inserida',
             status: error,
             boolean: true
           })
-          alert(error)
+          this.showConfirmedInsert = false
         })
     },
   }
@@ -242,7 +365,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .btn-add {
   position: fixed !important;
   bottom: 0%;
@@ -263,6 +386,13 @@ export default {
 }
 
 .mini-input {
+  width: 20%;
+  padding: 1%;
+  display: inline-block;
+  position: relative;
+}
+
+.mini-input-top {
   width: 50%;
   padding: 1%;
   display: inline-block;

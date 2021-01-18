@@ -1,17 +1,35 @@
+import { getJobs } from '../services/endpoits';
+
+const replaceApiData = async () => {
+
+  const response = await getJobs();
+  for(const data of response.data) {
+    /* Conversão da data enviada pela API */
+    data.next_run_time = dateToString(data.next_run_time);
+    data.last_run_time = dateToString(data.last_run_time);
+    /* Formatação das informações do Cron */
+    data.trigger = formatTrigger({
+      trigger: data.trigger,
+      minute: data.minute,
+      hour: data.hour,
+      day: data.day,
+      month: data.month,
+      day_of_week: data.day_of_week,
+      group_id: data.group_id,
+    })
+  } 
+  return response.data;
+}
+
 const concatZero = (args) => {
-  if(args < 10){
-    return '0'.concat(args.toString());
-  }else return args
+  return args < 10 ? '0'.concat(args.toString()):args
 }
 
 const isUndefined = (args) => {
-  if(args == undefined) {
-    return args = '*'
-  } 
-  else return args
+  return args == undefined ? args = '*':args
 }
 
-function dateToString(args) {
+const dateToString = (args) => {
 
   /*  
     OBS: Essa função recebe uma STRING data formatada pelo Scheduler API
@@ -36,7 +54,7 @@ function dateToString(args) {
   else return 'Não executando'.toUpperCase();
 }
 
-function formatTrigger(args) {
+const formatTrigger = (args) => {
 
   /* 
     OBS: Essa função concatena a trigger
@@ -57,7 +75,18 @@ function formatTrigger(args) {
   return response
 }
 
-function formatHttpMethod(args) {
+const formatHttpMethod = (args) => {
   return "jobs:".concat(args.toLowerCase().replace(' ', '_'))
 }
-export { dateToString, formatTrigger, formatHttpMethod }
+
+const getNumberRange = (begin, final) => {
+  const result = [] 
+  for(let i = begin; i <= final; i++) {
+    result.push(i.toString())
+    if(i==final) {
+      return result
+    }
+  } 
+}
+
+export { dateToString, formatTrigger, formatHttpMethod, getNumberRange, replaceApiData }

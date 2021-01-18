@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="$store.state.groupModal"
+    v-model="$store.getters.groupModal"
     hide-overlay
     transition="slide-x-reverse-transition"
     max-width="50%"

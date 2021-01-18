@@ -2,7 +2,7 @@
   <!-- CONFIRM DELETE -->
         <v-row justify="center">
           <v-dialog
-            v-model="$store.state.deleteModal"
+            v-model="$store.getters.deleteModal"
             persistent
             max-width="290"
           >
@@ -52,6 +52,8 @@ export default {
             status: result.status,
             boolean: true
           })
+          /* Remove dado da tabela */
+          this.$store.commit('removeApiData', this.id)
           this.$store.commit('changeDeleteModal', false)
         })
         .catch((error) => {

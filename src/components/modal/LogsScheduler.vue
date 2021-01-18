@@ -2,7 +2,7 @@
   <v-row justify="center">
       <v-row class="modal-scheduler">
       <v-dialog
-        v-model="$store.state.modalLogs"
+        v-model="$store.getters.modalLogs"
         hide-overlay
         transition="slide-x-reverse-transition"
         max-width="50%"
@@ -10,7 +10,7 @@
         
         <v-card height="100%" color="#2E3436">
           <v-toolbar dark color="teal">
-            <v-btn icon dark @click="$store.commit('changeModalLogs', false)">
+            <v-btn icon dark @click="closeModal()">
               <v-icon>mdi-close</v-icon>
             </v-btn>
             <v-toolbar-title>Logs</v-toolbar-title>
@@ -32,7 +32,13 @@
 </template>
 
 <script>
-export default {}
+export default {
+  methods: {
+    closeModal: function() {
+      this.$store.commit('changeModalLogs', false)
+    }
+  }
+}
 </script>
 
 <style>

@@ -4,6 +4,7 @@
     <v-main class="grey lighten-3">
       <Table />
       <InsertScheduler />
+      <EditScheduler />
       <InsertGroup />
       <Success />
       <Error />
@@ -16,13 +17,9 @@ import Menu from './menu/Menu'
 import Table from './table/Table'
 import InsertGroup from './modal/InsertGroup'
 import InsertScheduler from './modal/InsertScheduler'
+import EditScheduler from './modal/EditScheduler'
 import Success from './modal/jobExecConfirm/JobSuccess'
 import Error from './modal/jobExecConfirm/JobError'
-
-import { formatHttpMethod } from '../utils/format.js'
-import getNumberRange from '../utils/getNumberRange'
-import { postJob, patchJob } from '../services/endpoits'
-import replaceData from '../utils/replaceData'
 
 export default {
   components: {
@@ -32,6 +29,7 @@ export default {
     Table,
     Success,
     Error,
+    EditScheduler
   },
 }
 </script>

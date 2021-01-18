@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-container>
     <v-row>
       <div class="data-table">
@@ -19,7 +20,7 @@
             class="elevation-1"
             item-key="id"
             show-select
-            height="700px"
+            height="600px"
             :headers="headers"
             :items="$store.getters.apiData"
             :single-select="singleSelect"
@@ -37,7 +38,10 @@
             <template v-slot:item="row">
               <tr v-show="getSelectedGroup() == row.item.group_id">
                 <td>
-                  <v-checkbox @click="showToolBar(row.item.id)"></v-checkbox>
+                  <v-checkbox 
+                  @click="showToolBar(row.item.id)"
+                  v-model="checkBoxes" 
+                  :value="row.item.id"></v-checkbox>
                 </td>
                 <td>{{ row.item.id }}</td>
                 <td>{{ row.item.name }}</td>
@@ -50,7 +54,14 @@
                     {{ row.item.last_run_time }}
                   </v-chip>
                 </td>
-                <td>{{ row.item.next_run_time }}</td>
+                <td>
+                  <v-chip
+                    :color="setColor(row.item.next_run_time)"
+                    dark
+                  >
+                  {{ row.item.next_run_time }}
+                  </v-chip>
+                </td>
                 <td>{{ row.item.func }}</td>
                 <td>
                   <v-icon 
@@ -75,23 +86,34 @@
       </div>
     </v-row>
     <DeleteScheduler :id="id"/>
-    <EditScheduler />
   </v-container>
+  </div>
 </template>
 
 <script>
-import replaceData from '../../utils/replaceData'
+import { replaceApiData } from '../../utils/format'
 import DeleteScheduler from '../modal/DeleteScheduler'
-import EditScheduler from '../modal/EditScheduler'
 import Toolbar from '../menu/Toolbar'
 
 export default {
   components: {
-    DeleteScheduler, EditScheduler, Toolbar
+    DeleteScheduler, Toolbar
   }, 
+
+  computed: {
+    checkBoxes: {
+      get() {
+        return this.$store.getters.checkbox
+      }, 
+      set(value) {
+        this.$store.commit('changeCheckBox', value)
+      }
+    }
+  },
   
   data() {
     return {
+      /* checkbox:  false, */
       data: [],
       search: '', /* Inicia o campo de pesquisa */
       id: 0,
@@ -117,32 +139,57 @@ export default {
   },
 
   beforeMount: async function() {
-    const data = await replaceData()
-    this.$store.commit('changeApiData', data)
+    /* 
+    Carraga os dados da API formatados 
+    */
+    const data = await replaceApiData()
+    this.$store.commit('setApiData', data)
   },
 
   methods: {
     setColor: function(args) {
-      if (args == 'NÃO EXECUTANDO') return 'red'
-      else return 'green'
+      /* 
+      Altera a cor dependendo do comportamento  dos dados
+      */
+      return args == 'NÃO EXECUTANDO' ? 'red':'green'
     },
 
     deleteRow: function(id) {
+      /* 
+      Mostrar modal para deletar registro via Vuex
+      e envia o ID para deletar via props
+      */
       this.$store.commit('changeDeleteModal', true)
       this.id = id
     },
 
     editModal: function(payload) {
+      /* 
+      Altera estado da modal para edição 
+      e envia os dados para a modal via Vuex
+      */
       this.$store.commit('changeEditModal', true)
       this.$store.commit('changeFullData', payload)
     },
 
     showToolBar: function(id) {
-      this.$store.commit("changeToolBar")
-      this.id = id
+      /* 
+      Mostra a toolbar via Veux e altera o comportamento das checkbox
+      */
+      if (id != null) {
+        this.$store.commit("changeToolBar", true)
+        this.id = id
+        if (this.checkBoxes == null) {
+          this.$store.commit("changeToolBar", false)
+        }
+      }
     },
 
     getSelectedGroup: function() {
+      /* 
+      Retorna o grupo selecionado para mostrar 
+      apenas os registros correspondentes ao grupo
+      */
       return this.$store.getters.selectedGroup
     }
   }

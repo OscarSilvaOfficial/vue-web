@@ -4,7 +4,14 @@
       color="#6be68e"
       flat
     >
-      <p class="scheduler-text">SCHEDULER</p> 
+      <v-avatar
+        color="brown"
+        size="45"
+        class="logo-icon"
+      >
+        <img src="https://s3-sa-east-1.amazonaws.com/gorillascode-auth/apps/5.png">
+      </v-avatar>
+      
       <v-tabs
         centered
         class="ml-n9"
@@ -21,21 +28,23 @@
          <v-icon dark>mdi-plus</v-icon>
         </v-tab>
       </v-tabs>
-      <v-avatar
-        color="teal"
-        size="40"
-      ><img src="https://cdn.iconscout.com/icon/free/png-512/laptop-user-1-1179329.png" alt="Avatar" /></v-avatar>
+      <Avatar />
     </v-app-bar>
 </template>
 
 <script>
 import { getGroups } from '../../services/endpoits'
+import Avatar from './Avatar'
 
 export default {
 
+  components: {
+    Avatar
+  },
+
   data: function() {
     return {
-      groups: ''
+      groups: '',
     }
   },
 
@@ -47,6 +56,7 @@ export default {
   },
 
   mounted: function() {
+    /* Seleciona o grupo Default */
     this.changeSelectedGroup(1)
   },
 
@@ -63,13 +73,16 @@ export default {
 </script>
 
 <style>
-
-.scheduler-text {
+/* .scheduler-text {
   font-family: 'Audiowide', cursive;
   font-weight: 400;
   font-size: 2rem;
   position: relative;
   top: 10%;
-}
+} */
 
+.logo-icon {
+  position: relative;
+  left: 3%;
+}
 </style>

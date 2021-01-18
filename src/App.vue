@@ -1,15 +1,16 @@
 <template>
-  <Interface />
+  <div id="app">
+    <router-view />
+  </div>
 </template>
 
 <script>
-import Interface from './components/Interface';
-
 export default {
-  name: 'App',
 
-  components: {
-    Interface,
-  },
-};
+}
 </script>
+
+<style>
+
+</style>
+Interface

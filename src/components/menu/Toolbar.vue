@@ -4,7 +4,7 @@
     color="grey lighten-4"
     flat
     tile
-    v-show="$store.state.showToolBar"
+    v-show="$store.getters.showToolBar"
   >
     <LogsScheduler />
     <v-toolbar dense>
@@ -157,7 +157,7 @@ export default {
     logs: async function() {
       this.$store.commit('setScheduleId', this.id)
       this.$store.commit('changeModalLogs', true)
-      const logs = await getLogs(this.$store.getters.schedule_id)
+      const logs = await getLogs(this.id)
       this.$store.commit('setLogs', logs.data);  
     }
   },
