@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <!-- App principal que faz o roteamento -->
     <router-view />
   </div>
 </template>

@@ -14,7 +14,7 @@
               class="search-bar"
             ></v-text-field>
           </v-card-title>
-          <Toolbar :id="id"/>
+          <Toolbar :id="id" :accept_logs="accept_logs"/>
           <v-data-table
             fixed-header
             class="elevation-1"
@@ -39,11 +39,10 @@
               <tr v-show="getSelectedGroup() == row.item.group_id">
                 <td>
                   <v-checkbox 
-                  @click="showToolBar(row.item.id)"
+                  @click="showToolBar(row.item.id, row.item.accept_logs)"
                   v-model="checkBoxes" 
                   :value="row.item.id"></v-checkbox>
                 </td>
-                <td>{{ row.item.id }}</td>
                 <td>{{ row.item.name }}</td>
                 <td>{{ row.item.trigger }}</td>
                 <td>
@@ -63,6 +62,7 @@
                   </v-chip>
                 </td>
                 <td>{{ row.item.func }}</td>
+                <td>{{ row.item.kwargs.headers }}</td>
                 <td>
                   <v-icon 
                   class="icons"
@@ -91,9 +91,10 @@
 </template>
 
 <script>
-import { replaceApiData } from '../../utils/format'
+import { replaceApiData, replaceApiExecutions } from '../../utils/format'
 import DeleteScheduler from '../modal/DeleteScheduler'
 import Toolbar from '../menu/Toolbar'
+import { getLogs } from '../../services/endpoits'
 
 export default {
   components: {
@@ -117,13 +118,10 @@ export default {
       data: [],
       search: '', /* Inicia o campo de pesquisa */
       id: 0,
+      accept_logs: 0,
       singleSelect: true, /* Seleção de multi campos */
       headers: [
-        {
-          text: 'Id',
-          align: 'start',
-          value: 'identificator',
-        },
+
         {
           text: 'Tarefa',
           align: 'start',
@@ -133,6 +131,7 @@ export default {
         { text: 'Ultima Execução', value: 'last_run_time' },
         { text: 'Próxima Execução', value: 'next_run_time' },
         { text: 'Metodo HTTP', value: 'func' },
+        { text: 'HEADERS', value: 'headers' },
         { text: 'Alterações' },
       ],
     }
@@ -140,7 +139,7 @@ export default {
 
   beforeMount: async function() {
     /* 
-    Carraga os dados da API formatados 
+      Carraga os dados da API formatados 
     */
     const data = await replaceApiData()
     this.$store.commit('setApiData', data)
@@ -149,15 +148,15 @@ export default {
   methods: {
     setColor: function(args) {
       /* 
-      Altera a cor dependendo do comportamento  dos dados
+        Altera a cor dependendo do comportamento  dos dados
       */
       return args == 'NÃO EXECUTANDO' ? 'red':'green'
     },
 
     deleteRow: function(id) {
       /* 
-      Mostrar modal para deletar registro via Vuex
-      e envia o ID para deletar via props
+        Mostrar modal para deletar registro via Vuex
+        e envia o ID para deletar via props
       */
       this.$store.commit('changeDeleteModal', true)
       this.id = id
@@ -165,20 +164,27 @@ export default {
 
     editModal: function(payload) {
       /* 
-      Altera estado da modal para edição 
-      e envia os dados para a modal via Vuex
+        Altera estado da modal para edição 
+        e envia os dados para a modal via Vuex
       */
       this.$store.commit('changeEditModal', true)
       this.$store.commit('changeFullData', payload)
     },
 
-    showToolBar: function(id) {
+    showToolBar: async function(id, accept_logs) {
       /* 
-      Mostra a toolbar via Veux e altera o comportamento das checkbox
+        Carrega os dados dos logs
+      */
+      const logs = await replaceApiExecutions(id)
+      this.$store.commit('setLogs', logs);
+
+      /* 
+        Mostra a toolbar via Veux e altera o comportamento das checkbox
       */
       if (id != null) {
         this.$store.commit("changeToolBar", true)
         this.id = id
+        this.accept_logs = accept_logs
         if (this.checkBoxes == null) {
           this.$store.commit("changeToolBar", false)
         }
@@ -187,8 +193,8 @@ export default {
 
     getSelectedGroup: function() {
       /* 
-      Retorna o grupo selecionado para mostrar 
-      apenas os registros correspondentes ao grupo
+        Retorna o grupo selecionado para mostrar 
+        apenas os registros correspondentes ao grupo
       */
       return this.$store.getters.selectedGroup
     }

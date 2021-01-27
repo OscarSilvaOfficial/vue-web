@@ -35,6 +35,7 @@
               label="Tarefa"
               required
               class="input"
+              :rules="[() => !!func || 'Esse campo é necessário']"
             ></v-select>
 
             <v-text-field
@@ -42,6 +43,7 @@
               label="Nome da Tarefa"
               required
               class="input"
+              :rules="[() => !!name || 'Esse campo é necessário']"
             ></v-text-field>
 
             <v-text-field
@@ -49,6 +51,15 @@
               label="Recurso/URL"
               required
               class="input"
+              :rules="[() => !!url || 'Esse campo é necessário']"
+            ></v-text-field>
+
+            <v-text-field
+              class="input"
+              v-model="header"
+              label="Cabecalho da Requisição"
+              required
+              :rules="[() => !!header || 'Esse campo é necessário']"
             ></v-text-field>
 
             <v-text-field
@@ -57,47 +68,43 @@
               required
               v-if="httpMethod() == 'http POST'"
               class="input"
+              :rules="[() => !!body || 'Esse campo é necessário']"
             ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="minute"
-              :items="$store.getters.minutoSelect"
               label="Min"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="hour"
-              :items="$store.getters.horaSelect"
               label="Hora"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="day"
-              :items="$store.getters.diaSelect"
               label="Dia"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="month"
-              :items="$store.getters.mesSelect"
               label="Mês"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="week"
-              :items="$store.getters.semanaSelect"
               label="Semana"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
             <v-select
               v-model="groups"
@@ -105,6 +112,7 @@
               label="Grupo"
               required
               class="input"
+              :rules="[() => !!groups || 'Esse campo é necessário']"
             ></v-select>
 
             <v-text-field
@@ -113,6 +121,12 @@
               required
               class="input"
             ></v-text-field>
+
+            <v-switch
+              v-model="accept_logs"
+              label="Aceita Logs?"
+            ></v-switch>
+
           </v-form>
         </v-card>
       </v-dialog>
@@ -154,7 +168,7 @@
 </template>
 
 <script>
-import { formatHttpMethod, dateToString } from '../../utils/format.js'
+import { formatHttpMethod, dateToString, formatTrigger } from '../../utils/format.js'
 import { patchJob } from '../../services/endpoits'
 
 
@@ -180,6 +194,7 @@ export default {
         return this.$store.getters.groupFormNames[this.$store.getters.selectedGroup-1]
       },
       set(value) {
+        this.$store.commit('changeGroupForm', this.$store.getters.selectedGroup)
         for (let group of this.$store.getters.groups) {
           if (group.name == value) {
             this.$store.commit('changeGroupForm', group.id)
@@ -217,6 +232,14 @@ export default {
       },
       set(value) {
         this.$store.commit('setUrl', value)
+      }
+    },
+    header: {
+      get() {
+        return this.$store.getters.headers
+      },
+      set(value) {
+        this.$store.commit('setHeader', value)
       }
     },
     observation: {
@@ -283,35 +306,45 @@ export default {
         this.$store.commit('setWeek', value)
       }
     },
+    accept_logs: {
+      get() {
+        return this.$store.getters.accept_logs
+      },
+      set(value) {
+        this.$store.commit('changeAcceptLogs', value)
+      }
+    },
   },
 
   methods: {
+    
     httpMethod: function() {
       return this.$store.getters.tarefaData
     },
+
     confirmForm: function() {
       this.showConfirmedInsert = true
     },
 
     postForm: function() {
-      
       const payload = {
         args: this.$store.getters.corpo ? [this.$store.getters.url, this.$store.getters.corpo]:[this.$store.getters.url],
-        day: this.$store.getters.diaData,
-        day_of_week: this.$store.getters.semanaData,
+        day: this.$store.getters.diaData == '' ? null:this.$store.getters.diaData,
+        day_of_week: this.$store.getters.semanaData == '' ? null:this.$store.getters.semanaData,
         func: formatHttpMethod(this.$store.getters.tarefaData),
-        hour: this.$store.getters.horaData,
+        hour: this.$store.getters.horaData == '' ? null:this.$store.getters.horaData,
         id: this.$store.getters.identificator,
         kwargs: {
-          headers: {}
+          headers: JSON.parse(this.$store.getters.headers),
         },
-        minute: this.$store.getters.minutoData,
-        month: this.$store.getters.mesData.toString(),
+        minute: this.$store.getters.minutoData == '' ? null:this.$store.getters.minutoData,
+        month: this.$store.getters.mesData == '' ? null:this.$store.getters.mesData,
         name: this.$store.getters.nome,
         observation: this.$store.getters.observacoes,
         trigger: 'cron',
         group_id: this.$store.getters.groupFormData,
-      } 
+        accept_logs: this.$store.getters.accept_logs,
+      }  
       patchJob(payload)
         .then(result => {
           this.$store.commit('changeSuccessModal', {
@@ -323,6 +356,8 @@ export default {
           /* Altera os dados da tabela em tempo real */
           payload.next_run_time = dateToString(result.data.next_run_time)
           payload.last_run_time = dateToString(result.data.last_run_time)
+          payload.kwargs.headers = JSON.stringify(payload.kwargs.headers) 
+          payload.trigger = formatTrigger(result.data.trigger)
           this.$store.commit('refactorApiData', payload)
           
           /* Fecha os modais */

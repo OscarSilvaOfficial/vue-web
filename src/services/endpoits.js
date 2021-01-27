@@ -37,7 +37,7 @@ export const postGroup = (payload) => {
 }
 
 export const getLogs = (id) => {
-  return schedulerApi.get(`scheduler/logs/${id}`)
+  return schedulerApi.get(`scheduler/jobs/${id}/executions`)
 }
 
 export const postLog = (payload) => {

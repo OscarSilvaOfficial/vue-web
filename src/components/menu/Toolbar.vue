@@ -5,6 +5,7 @@
     flat
     tile
     v-show="$store.getters.showToolBar"
+    transition="slide-x-reverse-transition"
   >
     <LogsScheduler />
     <v-toolbar dense>
@@ -44,10 +45,11 @@
       </v-btn>
 
 
-      <v-btn
+    <v-btn
       color="blue-grey"
       @click="logs()"
       class="white--text toolbar-btn"
+      v-show="accept_logs"
     >
       <v-icon left dark>
           mdi-information
@@ -59,11 +61,13 @@
   </v-card>
 </template>
 <script>
-import { runJob, resumeJob, pauseJob, postLog, getLogs } from '../../services/endpoits'
+import { runJob, resumeJob, pauseJob, postLog } from '../../services/endpoits'
 import LogsScheduler from '../modal/LogsScheduler'
+import { dateToString } from '../../utils/format.js'
+
 
 export default {
-  props: ['id'],
+  props: ['id', 'accept_logs'],
 
   components: {
     LogsScheduler
@@ -74,7 +78,7 @@ export default {
       runJob(this.id)
       .then(result => {
         this.$store.commit('changeSuccessModal', {
-          text: 'executada',
+          text: 'enviada para execução',
           status: result.status,
           boolean: true
         })
@@ -83,6 +87,14 @@ export default {
           log: `Tarefa com o id ${this.id} foi enviada para execução.`
         }
         postLog(payload)
+
+        let data = result.data
+
+        /* Altera os dados da tabela em tempo real */
+        data.next_run_time = dateToString(data.next_run_time)
+        data.last_run_time = dateToString(data.last_run_time)
+        this.$store.commit('refactorApiData', data)
+        this.$store.commit('changeCheckBox', true)
       })
       .catch(error => {
         this.$store.commit('changeErrorModal', {
@@ -115,7 +127,7 @@ export default {
       .catch(error => {
         this.$store.commit('changeSuccessModal', {
           text: 'não ativada',
-          status: result.status,
+          status: error,
           boolean: true
         })
         const payload = {
@@ -143,7 +155,7 @@ export default {
       .catch(error => {
         this.$store.commit('changeSuccessModal', {
           text: 'não pausada',
-          status: result.status,
+          status: error,
           boolean: true
         })
         const payload = {
@@ -157,9 +169,7 @@ export default {
     logs: async function() {
       this.$store.commit('setScheduleId', this.id)
       this.$store.commit('changeModalLogs', true)
-      const logs = await getLogs(this.id)
-      this.$store.commit('setLogs', logs.data);  
-    }
+    }, 
   },
 }
 </script>

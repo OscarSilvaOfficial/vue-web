@@ -1,12 +1,29 @@
-import { getJobs } from '../services/endpoits';
+import { getJobs, getLogs } from '../services/endpoits';
+
+const replaceApiExecutions = async (job_id) => {
+  const dataApi = await getLogs(job_id)
+  const executions = dataApi.data
+
+  executions.map(result => {
+    result.exec_date = dateToString(result.exec_date)
+    result.exec_status = result.exec_status.toUpperCase()
+    
+  })
+  
+  return executions
+}
 
 const replaceApiData = async () => {
+  /* 
+    Formata os dados enviados pela API
+  */
 
   const response = await getJobs();
   for(const data of response.data) {
     /* Conversão da data enviada pela API */
     data.next_run_time = dateToString(data.next_run_time);
     data.last_run_time = dateToString(data.last_run_time);
+    data.kwargs.headers = JSON.stringify(data.kwargs.headers) 
     /* Formatação das informações do Cron */
     data.trigger = formatTrigger({
       trigger: data.trigger,
@@ -26,7 +43,7 @@ const concatZero = (args) => {
 }
 
 const isUndefined = (args) => {
-  return args == undefined ? args = '*':args
+  return args == undefined ? '*':args
 }
 
 const dateToString = (args) => {
@@ -76,10 +93,17 @@ const formatTrigger = (args) => {
 }
 
 const formatHttpMethod = (args) => {
+  /* 
+    Formatação do método http para envio dos 
+    dados a API 
+  */
   return "jobs:".concat(args.toLowerCase().replace(' ', '_'))
 }
 
 const getNumberRange = (begin, final) => {
+  /* 
+    Gera um range de números  
+  */
   const result = [] 
   for(let i = begin; i <= final; i++) {
     result.push(i.toString())
@@ -89,4 +113,5 @@ const getNumberRange = (begin, final) => {
   } 
 }
 
-export { dateToString, formatTrigger, formatHttpMethod, getNumberRange, replaceApiData }
+export { dateToString, formatTrigger, formatHttpMethod, 
+      getNumberRange, replaceApiData, replaceApiExecutions }

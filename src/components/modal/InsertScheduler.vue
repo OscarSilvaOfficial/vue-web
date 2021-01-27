@@ -47,6 +47,7 @@
               label="Identificador"
               required
               class="mini-input-top"
+              :rules="[() => !!identificator || 'Esse campo é necessário']"
             ></v-text-field>
 
             <v-select
@@ -55,6 +56,7 @@
               label="Tarefa"
               required
               class="mini-input-top"
+              :rules="[() => !!func || 'Esse campo é necessário']"
             ></v-select>
 
             <v-text-field
@@ -62,6 +64,7 @@
               v-model="name"
               label="Nome da Tarefa"
               required
+              :rules="[() => !!name || 'Esse campo é necessário']"
             ></v-text-field>
 
             <v-text-field
@@ -69,6 +72,7 @@
               v-model="url"
               label="Recurso/URL"
               required
+              :rules="[() => !!url || 'Esse campo é necessário']"
             ></v-text-field>
             
             <v-text-field
@@ -77,47 +81,51 @@
               label="Corpo da Requisição"
               required
               v-if="httpMethod() == 'http POST'"
+              :rules="[() => !!body || 'Esse campo é necessário']"
             ></v-text-field>
 
-            <v-select
+            <v-text-field
+              class="input"
+              v-model="header"
+              label="Cabecalho da Requisição"
+              required
+              :rules="[() => !!header || 'Esse campo é necessário']"
+            ></v-text-field>
+
+            <v-text-field
               v-model="minute"
-              :items="$store.getters.minutoSelect"
               label="Min"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="hour"
-              :items="$store.getters.horaSelect"
               label="Hora"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="day"
-              :items="$store.getters.diaSelect"
               label="Dia"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="month"
-              :items="$store.getters.mesSelect"
               label="Mês"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
-            <v-select
+            <v-text-field
               v-model="week"
-              :items="$store.getters.semanaSelect"
               label="Semana"
               required
               class="mini-input"
-            ></v-select>
+            ></v-text-field>
 
             <v-select
               v-model="groups"
@@ -125,6 +133,7 @@
               label="Grupo"
               required
               class="input"
+              :rules="[() => !!groups || 'Esse campo é necessário']"
             ></v-select>
 
             <v-text-field
@@ -133,6 +142,11 @@
               required
               class="input"
             ></v-text-field>
+
+            <v-switch
+              v-model="accept_logs"
+              label="Aceita Logs?"
+            ></v-switch>
 
           </v-form>
         </v-card>
@@ -175,7 +189,7 @@
 </template>
 
 <script>
-import { formatHttpMethod, dateToString } from '../../utils/format'
+import { formatHttpMethod, dateToString, formatTrigger } from '../../utils/format'
 import { postJob } from '../../services/endpoits'
 
 export default {
@@ -234,6 +248,14 @@ export default {
       },
       set(value) {
         this.$store.commit('setUrl', value)
+      }
+    },
+    header: {
+      get() {
+        return this.$store.getters.headers
+      },
+      set(value) {
+        this.$store.commit('setHeader', value)
       }
     },
     observation: {
@@ -300,6 +322,14 @@ export default {
         this.$store.commit('setWeek', value)
       }
     },
+    accept_logs: {
+      get() {
+        return this.$store.getters.accept_logs
+      },
+      set(value) {
+        this.$store.commit('changeAcceptLogs', value)
+      }
+    },
   },
 
   methods: {
@@ -322,20 +352,21 @@ export default {
     postForm: function(job) {
       const payload = {
         args: this.$store.getters.corpo ? [this.$store.getters.url, this.$store.getters.corpo]:[this.$store.getters.url],
-        day: this.$store.getters.diaData,
-        day_of_week: this.$store.getters.semanaData,
+        day: this.$store.getters.diaData == '' ? null:this.$store.getters.diaData,
+        day_of_week: this.$store.getters.semanaData == '' ? null:this.$store.getters.semanaData,
         func: formatHttpMethod(this.$store.getters.tarefaData),
-        hour: this.$store.getters.horaData,
+        hour: this.$store.getters.horaData == '' ? null:this.$store.getters.horaData,
         id: this.$store.getters.identificator,
         kwargs: {
-          headers: {}
+          headers: JSON.parse(this.$store.getters.headers),
         },
-        minute: this.$store.getters.minutoData,
-        month: this.$store.getters.mesData.toString(),
+        minute: this.$store.getters.minutoData == '' ? null:this.$store.getters.minutoData,
+        month: this.$store.getters.mesData == '' ? null:this.$store.getters.mesData,
         name: this.$store.getters.nome,
         observation: this.$store.getters.observacoes,
         trigger: 'cron',
         group_id: this.$store.getters.groupFormData,
+        accept_logs: this.$store.getters.accept_logs,
       } 
       postJob(payload)
         .then((result) => {
@@ -347,6 +378,8 @@ export default {
           /* Atualiza o valor em tempo real */
           payload.next_run_time = dateToString(result.data.next_run_time)
           payload.last_run_time = dateToString(result.data.last_run_time)
+          payload.kwargs.headers = JSON.stringify(payload.kwargs.headers) 
+          payload.trigger = formatTrigger(result.data.trigger)
           this.$store.commit('changeApiData', payload)
           this.dialog = false
           this.showConfirmedInsert = false

@@ -55,6 +55,10 @@ export default {
           /* Remove dado da tabela */
           this.$store.commit('removeApiData', this.id)
           this.$store.commit('changeDeleteModal', false)
+          /* 
+          Desabilida as checkboxes selecionadas 
+          */
+          this.$store.commit('changeCheckBox', true)
         })
         .catch((error) => {
           this.$store.commit('changeErrorModal', {

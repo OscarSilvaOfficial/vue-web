@@ -19,31 +19,13 @@ export default {
     url: '',
     observacoes: '',
     corpo: '',
-
-    minuto:{
-      select: getNumberRange(0, 59), /* Arrey com os minutos */
-      data: ''
-    }, 
-
-    hora:{
-      select: getNumberRange(0, 24), /* Arrey com a horas */
-      data: ''
-    }, 
-
-    dia:{
-      select: getNumberRange(1, 31), /* Arrey com todos os dias de um mês */
-      data: ''
-    }, 
-
-    mes:{
-      select: getNumberRange(1, 12),
-      data: ''
-    },  
-
-    semana:{
-      select: getNumberRange(1, 6),
-      data: ''
-    }, 
+    headers: '',
+    minuto:'',
+    hora:'',
+    dia: '',
+    mes:'',
+    semana: '',
+    accept_logs: '',
 
     fullWidth: false,
     valid: true,
@@ -57,19 +39,20 @@ export default {
     nome: state => state.nome,
     url: state => state.url,
     observacoes: state => state.observacoes,
-    minutoData: state => state.minuto.data,
-    minutoSelect: state => state.minuto.select,
-    horaData: state => state.hora.data,
-    horaSelect: state => state.hora.select,
-    diaData: state => state.dia.data,
+    minutoData: state => state.minuto,
+    horaData: state => state.hora,
+    diaData: state => state.dia,
     corpo: state => state.corpo,
-    diaSelect: state => state.dia.select,
-    mesData: state => state.mes.data,
-    mesSelect: state => state.mes.select,
-    semanaData: state => state.semana.data,
-    semanaSelect: state => state.semana.select,
+    headers: state => state.headers,
+    accept_logs: state => state.accept_logs,
+    mesData: state => state.mes,
+    semanaData: state => state.semana,
   },
   mutations: {
+    changeAcceptLogs(state, boolean) {
+      state.accept_logs = boolean == true ? 1:0
+    },
+
     changeCheckBox(state, boolean) {
       state.checkbox = boolean
     },
@@ -103,6 +86,10 @@ export default {
       state.identificator = id
     },
 
+    setHeader: function(state, header) {
+      state.headers = header
+    },
+
     setFunc: function(state, func) {
       state.tarefa.data = state.tarefa.select[func == 'http GET'? 0:1]
     },
@@ -124,23 +111,23 @@ export default {
     },
 
     setMinute: function(state, minute) {
-      state.minuto.data = minute
+      state.minuto = minute
     },
 
     setHour: function(state, hour) {
-      state.hora.data = hour
+      state.hora = hour
     },
 
     setDay: function(state, day) {
-      state.dia.data = day
+      state.dia = day
     },
 
     setMonth: function(state, month) {
-      state.mes.data = month
+      state.mes = month
     },
 
     setWeek: function(state, week) {
-      state.semana.data = week
+      state.semana = week
     },
 
     changeFullData(state, kwargs) {
@@ -148,13 +135,15 @@ export default {
       state.tarefa.data = state.tarefa.select[kwargs.func == 'jobs:http_get'? 0:1]
       state.nome = kwargs.name
       state.url = kwargs.args[0]
-      state.observacoes = kwargs.observations
+      state.observacoes = kwargs.observation
+      state.headers = kwargs.kwargs.headers
       state.corpo = kwargs.args[1]
-      state.minuto.data = kwargs.minute
-      state.hora.data = kwargs.hour
-      state.dia.data = kwargs.day
-      state.mes.data = kwargs.month
-      state.semana.data = kwargs.day_of_week
+      state.minuto = kwargs.minute
+      state.hora = kwargs.hour
+      state.dia = kwargs.day
+      state.mes = kwargs.month
+      state.semana = kwargs.day_of_week
+      state.accept_logs = kwargs.accept_logs
     }
   }
 }
